@@ -2,47 +2,44 @@ var Q = require('q');
 var REQ = require('request');
 
 bbcPlaylistUrl = "http://www.bbc.co.uk/radio1/playlist.json";
-googleBooksUrl = "https://zzzwww.googleapis.com/books/v1/volumes?q=isbn:{{isbn}}"
+googleBooksUrl = "https://www.googleapis.com/books/v1/volumes?q=isbn:{{isbn}}"
+
 // -------------------------------------------------------------------------------------------------- //
-//  ex 5:
+//  ex 1:  q.all - all defers handled as one, looping through results
 // -------------------------------------------------------------------------------------------------- //
 
-var getAuthorFromGoogle = function (isbn) {
+var getBookByIsbn = function (isbn) {
 		 var deferred = Q.defer();
 		 var u = googleBooksUrl.replace('{{isbn}}',isbn);
 		 REQ({url:u}, function(err, res, content){
 			if (!err && res.statusCode == 200) {
 				var result  = JSON.parse(content);
-// console.log('resultITEMS********',result.items[0].volumeInfo.title);
-// console.log('resultITEMS********',result.items[0].volumeInfo.authors[0]);
 				deferred.resolve(result);
 			} else if(res.statusCode != 200){
-				deferred.reject('server status' + res.statusCode);
+				deferred.reject('server status: ' + res.statusCode);
 			} else {
-				deferred.reject('error' + err);
+				deferred.reject('error: ' + err);
 			}
 		 })
 		 return deferred.promise;
 };
 
-promisesArr = [getAuthorFromGoogle('9780007141937')];
-//promisesArr = [getAuthor('The Book Thief'), getAuthor('The Road'),getAuthor('Green Eggs and Ham')];
+promisesArr = [getBookByIsbn('9780007141937'),getBookByIsbn('0307387895'),getBookByIsbn('0062225677')];
 
 var bunchOPromises = Q.all(promisesArr);
-bunchOPromises.spread(function (results) {
-	console.log(results.items[0].volumeInfo.title);
+bunchOPromises.then(function (results) {
+	console.log('\r\n-----  example 1  -----')
+for (var i = 0; i < results.length; i++) {
+	console.log(i + '. ',results[i].items[0].volumeInfo.title + ' by ' + results[i].items[0].volumeInfo.authors[0]);
+};
+//	console.log(results.items[0].volumeInfo.title);
 }).fail(function(e){
 	console.log('error: ',e)
 });
 
-
-
 // -------------------------------------------------------------------------------------------------- //
-//  ex 5:
+//  ex 2:
 // -------------------------------------------------------------------------------------------------- //
-
-
-
 
 var getPlaylist = function (num) {
 		 var deferred = Q.defer();
@@ -50,10 +47,10 @@ var getPlaylist = function (num) {
 			if (!err && res.statusCode == 200) {
 				var result  = JSON.parse(content);
 				deferred.resolve(result.playlist.hottestrecord2013[num].title);
-			} else if(res.statusCode){
-				deferred.reject(res);
+			} else if(res.statusCode != 200){
+				deferred.reject('server status: ' + res.statusCode);
 			} else {
-				deferred.reject('bummer');
+				deferred.reject('bummer: ' + err);
 			}
 		 })
 		 return deferred.promise;
@@ -63,10 +60,8 @@ promises = [getPlaylist(0), getPlaylist(1), getPlaylist(2)]
 
 Q.all(promises)
 	.then(function(result) {
+		console.log('\r\n-----  example 2  -----')
 		console.log('result',result);
-		// for (var i = 0, len = result.length; i < len; i++) {
-		// 	console.log('result.result',result[i].result);
-		// }
 	}).fail(function(e){
 		console.log('error1: ',e.statusCode);
 	});
@@ -75,6 +70,7 @@ Q.all(promises)
 // -------------------------------------------------------------------------------------------------- //
 
 function showResults(a,b,c){
+	console.log('\r\n-----  example 3  -----')
 	console.log('a',a);
 	console.log('b',b);
 	console.log('c',c);
@@ -82,9 +78,6 @@ function showResults(a,b,c){
 
 return Q.spread(promises, showResults, function(err) {
 		console.log('error2', err.statusCode);})
-
-console.log('-------------------------------------');
-
 
 // -------------------------------------------------------------------------------------------------- //
 //
