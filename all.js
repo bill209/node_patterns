@@ -65,33 +65,64 @@ Q.all(promises)
 	}).fail(function(e){
 		console.log('error1: ',e.statusCode);
 	});
-// -------------------------------------------------------------------------------------------------- //
-//  ex 5: using .spread to render the results separately
-// -------------------------------------------------------------------------------------------------- //
-
-function showResults(a,b,c){
-	console.log('\r\n-----  example 3  -----')
-	console.log('a',a);
-	console.log('b',b);
-	console.log('c',c);
-}
-
-return Q.spread(promises, showResults, function(err) {
-		console.log('error2', err.statusCode);})
 
 // -------------------------------------------------------------------------------------------------- //
-//
+//	ex 3: call q.all from within a function
 // -------------------------------------------------------------------------------------------------- //
-console.log('-----------');
-//var promisesArr = [getPlaylist(0), getPlaylist(1)];
 
-// Q()
-//   .then(function () {
-//     return promisesArr; // return a list
-//   })
-//   .all()
-//   .then(function (results) {
-//   	console.log('results',results);
-//   }).rej(function(res){
-//   	console.log('error',results);
-//   });
+var funcB = function(x){
+console.log('x',x);
+	var deferred = Q.defer();
+	deferred.resolve(x.toUpperCase());
+	return deferred.promise;
+};
+
+promisesArr = [funcB('four score'),funcB('and seven'),funcB('years ago...')];
+
+var funcA = function(){
+	Q.all(promisesArr)
+	.then(function(z){
+		console.log('\r\n-----  example 3  -----')
+		console.log('z',z);
+	}).fail(function(e){
+		console.log('e',e);
+	})
+}();
+
+// -------------------------------------------------------------------------------------------------- //
+//	ex 4: call q.all from within a function
+// -------------------------------------------------------------------------------------------------- //
+
+var func3 = function(x){
+	var deferred = Q.defer();
+	deferred.resolve(x.toUpperCase());
+	return deferred.promise;
+};
+
+promisesArr = [func3('four score'),func3('and seven'),func3('years ago...')];
+
+var func2 = function(){
+	var deferred = Q.defer();
+	Q.all(promisesArr)
+	.then(function(z){
+		deferred.resolve(z);
+	}).fail(function(e){
+		console.log('e',e);
+	})
+	return deferred.promise;
+};
+
+var func1 = function(){
+//function func1(){
+	func2()
+	.then(function(result){
+		console.log('\r\n-----  example 4  -----')
+		console.log('result',result);
+	}).fail(function(e){
+		console.log('e',e);
+	}).fin(function(){
+		console.log('\r\ngame over\r\n');
+	})
+}();
+
+
