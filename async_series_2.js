@@ -1,6 +1,8 @@
+/*
+	async example using an array of async functions with parms
+	also: shows the use of .apply v not using .apply to pass parms
+*/
 var async = require('async');
-
-globalx = 'start: ';
 
 // create an array of asynchronous job
 // passing parameters with .apply
@@ -24,14 +26,12 @@ var jobs2 = [
 //  completion before calling the next
 async.series(jobs, function(err, results){
 	console.log('results',results);
-	console.log('globalx',globalx);
 });
 
 // this is the asynchronous function
 function asyncFunc(ms,callback){
 	console.log('asyncFunc: ms',ms);
 	setTimeout(function(){
-		globalx += ms;
 		console.log('async ms: '+ms);
 		callback(null,'cb good: ' + ms);
 	}, ms*500,ms);

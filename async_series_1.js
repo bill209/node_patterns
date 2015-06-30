@@ -1,3 +1,6 @@
+/*
+	simple async example
+*/
 var async = require('async');
 
 async.series([
@@ -14,8 +17,6 @@ async.series([
 			}, 2000);
 	},
 ],
-// optional callback
 function(err, results){
 	console.log('results',results);
-	// results is now equal to ['one', 'two']
 });
